@@ -114,7 +114,7 @@ Activate satellite view to browse satelite imagery, capture a screenshot, select
 ### Prerequisites
 
 1. **Red Hat OpenShift 4.2x cluster** 
-2. **OpenShift AI 3.x** with KServe/ModelMesh enabled
+2. **OpenShift AI 3.x** 
 3. **oc CLI** authenticated to your cluster
 4. **Helm 3.10+** installed locally
 
