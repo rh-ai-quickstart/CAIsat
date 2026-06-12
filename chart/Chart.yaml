@@ -1,0 +1,8 @@
+apiVersion: v2
+name: my-quickstart
+description: A Helm chart for deploying an AI quickstart on OpenShift AI
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: CONTRIBUTOR_NAME

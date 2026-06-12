@@ -1,0 +1,37 @@
+[CONTRIBUTOR TODO: Replace this entire file with your chosen open source license]
+
+This quickstart MUST include an open source license to be published in the rh-ai-quickstart organization.
+
+=================================================================================
+RECOMMENDED LICENSES FOR AI QUICKSTARTS
+=================================================================================
+
+1. Apache License 2.0 (RECOMMENDED for most quickstarts)
+   - Permissive license
+   - Allows commercial use
+   - Provides patent protection
+   - Compatible with Red Hat projects
+   - Download from: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+2. MIT License
+   - Very permissive and simple
+   - Allows commercial use
+   - Minimal restrictions
+   - Download from: https://opensource.org/licenses/MIT
+
+
+=================================================================================
+HOW TO ADD YOUR LICENSE
+=================================================================================
+
+Step 1: Choose a license from the list above (Apache 2.0 recommended)
+
+Step 2: Download the full license text from the provided URL
+
+Step 3: Replace this ENTIRE file with the license text
+
+Step 4: If the license requires it (like Apache 2.0), add copyright information:
+        Copyright [YEAR] [COPYRIGHT HOLDER]
+
+Step 5: Verify the LICENSE file is in the root of your repository
+

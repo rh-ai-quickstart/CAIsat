@@ -1,0 +1,20 @@
+---
+# LLM configuration (optional)
+# Only needed if your quickstart requires a model.
+#
+# Option A: Bring your own model (MaaS - Model as a Service)
+# Uncomment and set these values to use an external model endpoint.
+# model:
+#   name: my-model
+#   endpoint: https://my-maas-instance:443    # full URL including protocol and port
+#   api_key: my-api-key
+#
+# Option B: Deploy a model with this chart
+# When model is not set (or empty), the chart can deploy a default model.
+# Add your own InferenceService template under templates/ for this.
+model: {}
+
+# -- Add your quickstart-specific values below --
+# app:
+#   replicas: 1
+#   image: quay.io/my-org/my-app:latest
