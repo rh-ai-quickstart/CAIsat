@@ -480,8 +480,10 @@ body {
 }
 
 .result-panel img {
-    max-width: 400px;
+    width: 512px;
+    height: auto;
     border-radius: 4px;
+    image-rendering: pixelated;
 }
 
 .result-arrow {
