@@ -1,0 +1,10 @@
+# Architecture Diagrams
+
+Add your architecture diagram here as `architecture-diagram.png`
+
+The diagram should show:
+- Frontend (React) web UI
+- Backend (FastAPI) API server
+- Model Server (MLServer with SwinIR ONNX model)
+- Data flow between components
+- External user interaction points

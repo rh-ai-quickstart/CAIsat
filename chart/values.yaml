@@ -1,20 +1,116 @@
----
-# LLM configuration (optional)
-# Only needed if your quickstart requires a model.
-#
-# Option A: Bring your own model (MaaS - Model as a Service)
-# Uncomment and set these values to use an external model endpoint.
-# model:
-#   name: my-model
-#   endpoint: https://my-maas-instance:443    # full URL including protocol and port
-#   api_key: my-api-key
-#
-# Option B: Deploy a model with this chart
-# When model is not set (or empty), the chart can deploy a default model.
-# Add your own InferenceService template under templates/ for this.
-model: {}
+# Default values for caisat
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 
-# -- Add your quickstart-specific values below --
-# app:
-#   replicas: 1
-#   image: quay.io/my-org/my-app:latest
+# Model configuration
+model:
+  # Deploy the model as part of this chart
+  deploy: true
+
+  # OCI image with the ONNX model
+  image:
+    repository: quay.io/sara_banderby/csi_cai
+    tag: "model"
+
+  # InferenceService name
+  name: swinir
+
+  # Service name of the model inference endpoint (auto-generated: <name>-predictor)
+  serviceName: swinir-predictor
+
+  # Namespace where the model is deployed
+  # Leave empty ("") to use the same namespace as the Helm release
+  namespace: ""
+
+  # Port (MLServer default is 8080)
+  port: 8080
+
+  # Model runtime
+  runtime: mlserver
+
+  # Resources for the model server
+  resources:
+    requests:
+      cpu: "4"
+      memory: "6Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+
+# Backend configuration
+backend:
+  replicaCount: 1
+
+  image:
+    repository: quay.io/sara_banderby/caisat
+    pullPolicy: Always
+    tag: "backend"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  route:
+    enabled: true
+    host: ""  # Leave empty for auto-generated
+    tls:
+      enabled: true
+      termination: edge
+
+# Frontend configuration
+frontend:
+  replicaCount: 1
+
+  image:
+    repository: quay.io/sara_banderby/caisat
+    pullPolicy: Always
+    tag: "frontend"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  route:
+    enabled: true
+    host: ""  # Leave empty for auto-generated
+    tls:
+      enabled: true
+      termination: edge
+
+# Image pull secrets (if using private registry)
+imagePullSecrets: []
+# - name: quay-pull-secret
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context - empty to use OpenShift's assigned UID
+podSecurityContext: {}
+
+# Security context - empty to use OpenShift's assigned UID
+securityContext: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

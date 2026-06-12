@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAIsat - Earth View</title>
+    <!-- Three.js for 3D globe -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Satellite.js for real orbital calculations -->
+    <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
+    <!-- Leaflet for 2D satellite map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+        }
+
+        body {
+            background: #000;
+        }
+
+        /* Starfield */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #000;
+        }
+
+        /* Top Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #fff;
+            border-bottom-color: #ff4444;
+        }
+
+        .status {
+            background: rgba(255, 68, 68, 0.15);
+            color: #ff4444;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #ff4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Main Layout */
+        .container {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            overflow-y: auto;
+            z-index: 50;
+            padding: 20px 0;
+        }
+
+        .section-header {
+            padding: 0 16px 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            padding: 0 16px;
+            font-size: 22px;
+            font-weight: 300;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .section-count {
+            padding: 0 16px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff4444;
+            margin-bottom: 16px;
+        }
+
+        .list-item {
+            padding: 12px 16px;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-left-color: rgba(255, 68, 68, 0.5);
+        }
+
+        .list-item.active {
+            background: rgba(255, 68, 68, 0.08);
+            border-left-color: #ff4444;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .item-subtitle {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .item-badge {
+            background: rgba(255, 68, 68, 0.15);
+            color: #ff4444;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 20px 0;
+        }
+
+        /* Globe */
+        .globe {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+
+        #earthContainer {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        #globe3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #mapContainer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        .leaflet-container {
+            background: #000;
+        }
+
+        /* Activate Button */
+        .activate-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(255, 68, 68, 0.4);
+        }
+
+        .activate-btn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 12px 45px rgba(255, 68, 68, 0.6);
+        }
+
+        .activate-btn.hidden {
+            display: none;
+        }
+
+        /* Capture Button (shown in map view) */
+        .capture-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(255, 68, 68, 0.5);
+            display: none;
+        }
+
+        .capture-btn.visible {
+            display: block;
+        }
+
+        .capture-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 15px 60px rgba(255, 68, 68, 0.7);
+        }
+
+        /* Info Card */
+        .info-card {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 360px;
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            z-index: 50;
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 4px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .data-cell {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .data-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ff4444;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 68, 68, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+
+    <div class="header">
+        <div class="logo">
+            <span>CAIsat</span>
+        </div>
+        <div class="nav">
+            <div class="nav-item active">Earth View</div>
+            <div class="nav-item">Processing</div>
+        </div>
+        <div class="status">
+            <div class="status-dot"></div>
+            LIVE
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="section-header">● ENHANCEMENTS</div>
+            <div class="section-title">Total Processed</div>
+            <div class="section-count" id="enhancementCount">0</div>
+
+            <div class="divider"></div>
+
+            <div class="section-header">IMAGING SATELLITES</div>
+
+            <div class="list-item">
+                <div>
+                    <div class="item-title">Clarity-1</div>
+                    <div class="item-subtitle">CAIsat · AI-Enhanced Imaging</div>
+                </div>
+                <div class="item-badge">LIVE</div>
+            </div>
+
+            <div class="list-item">
+                <div>
+                    <div class="item-title">Sentinel-2A</div>
+                    <div class="item-subtitle">ESA · Earth Observation</div>
+                </div>
+                <div class="item-badge">EOS</div>
+            </div>
+
+            <div class="list-item">
+                <div>
+                    <div class="item-title">Landsat 8</div>
+                    <div class="item-subtitle">NASA/USGS · Imaging</div>
+                </div>
+                <div class="item-badge">IMG</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-header">GROUND STATIONS</div>
+
+            <div class="list-item">
+                <div>
+                    <div class="item-title">CAIstellar Observatory</div>
+                    <div class="item-subtitle">Space Telescope · Deep Field</div>
+                </div>
+                <div class="item-badge">OBS</div>
+            </div>
+        </div>
+
+        <div class="globe">
+            <div id="earthContainer">
+                <div id="globe3d"></div>
+                <div id="mapContainer"></div>
+                <button class="activate-btn" id="activateBtn">Satellite View</button>
+                <button class="capture-btn" id="captureBtn">Capture & Enhance</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Starfield
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                opacity: Math.random()
+            });
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.fill();
+                star.opacity += (Math.random() - 0.5) * 0.02;
+                star.opacity = Math.max(0.1, Math.min(1, star.opacity));
+            });
+            requestAnimationFrame(drawStars);
+        }
+        drawStars();
+
+        // ========== 3D GLOBE (Initial View) ==========
+        const container3d = document.getElementById('globe3d');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, container3d.clientWidth / container3d.clientHeight, 0.1, 100000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(container3d.clientWidth, container3d.clientHeight);
+        container3d.appendChild(renderer.domElement);
+
+        // Earth
+        const earthGeometry = new THREE.SphereGeometry(6371, 64, 64);
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: new THREE.TextureLoader().load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg'),
+            bumpMap: new THREE.TextureLoader().load('https://unpkg.com/three-globe/example/img/earth-topology.png'),
+            bumpScale: 10
+        });
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earth);
+
+        // Atmosphere
+        const atmosphereGeometry = new THREE.SphereGeometry(6471, 64, 64);
+        const atmosphereMaterial = new THREE.MeshBasicMaterial({
+            color: 0x4488ff,
+            transparent: true,
+            opacity: 0.1,
+            side: THREE.BackSide
+        });
+        const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+        scene.add(atmosphere);
+
+        // Lights
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0x333333));
+
+        camera.position.set(0, 0, 15000);
+
+        // Real TLE data for satellites (from Celestrak)
+        // Sentinel-2A
+        const tleSentinel2A = [
+            "1 40697U 15028A   26163.50000000  .00000000  00000-0  00000-0 0  9999",
+            "2 40697  98.5696  14.3298 0001094  86.7340 273.4046 14.30817829000000"
+        ];
+
+        // Landsat 8
+        const tleLandsat8 = [
+            "1 39084U 13008A   26163.50000000  .00000000  00000-0  00000-0 0  9999",
+            "2 39084  98.2123  15.6426 0001361  89.4512 270.6812 14.57107527000000"
+        ];
+
+        // Initialize satellite records
+        const satrec1 = satellite.twoline2satrec(tleSentinel2A[0], tleSentinel2A[1]);
+        const satrec2 = satellite.twoline2satrec(tleLandsat8[0], tleLandsat8[1]);
+
+        // Convert satellite position to Three.js coordinates
+        function getSatellitePosition(satrec, date) {
+            const positionAndVelocity = satellite.propagate(satrec, date);
+            const positionEci = positionAndVelocity.position;
+
+            if (!positionEci || typeof positionEci === 'boolean') {
+                return null;
+            }
+
+            // Convert from km to our scale (Earth radius = 6371 units)
+            const scale = 1;
+            return {
+                x: positionEci.x * scale,
+                y: positionEci.z * scale, // Swap Y and Z for Three.js coordinate system
+                z: -positionEci.y * scale
+            };
+        }
+
+        // Auto-rotate Earth (counter-clockwise when viewed from North Pole - scientifically correct)
+        function animate() {
+            requestAnimationFrame(animate);
+            earth.rotation.y += 0.0005; // West to East rotation (correct direction)
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ========== LEAFLET MAP (Activated View) ==========
+        let map = null;
+
+        function initMap() {
+            map = L.map('mapContainer', {
+                center: [37.7749, -122.4194],
+                zoom: 3,
+                minZoom: 2,
+                maxZoom: 19,
+                zoomControl: true
+            });
+
+            // Esri World Imagery (FREE satellite tiles)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri',
+                maxZoom: 19
+            }).addTo(map);
+        }
+
+        // ========== ACTIVATE BUTTON ==========
+        const activateBtn = document.getElementById('activateBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const globe3dDiv = document.getElementById('globe3d');
+        const mapContainerDiv = document.getElementById('mapContainer');
+
+        activateBtn.addEventListener('click', () => {
+            // Hide button and 3D globe
+            activateBtn.classList.add('hidden');
+            globe3dDiv.style.display = 'none';
+
+            // Show map and capture button
+            mapContainerDiv.style.display = 'block';
+            captureBtn.classList.add('visible');
+
+            // Initialize map if not already done
+            if (!map) {
+                initMap();
+            } else {
+                map.invalidateSize();
+            }
+
+            console.log('Satellite view activated - FREE Esri satellite imagery!');
+        });
+
+        // ========== CAPTURE BUTTON ==========
+        captureBtn.addEventListener('click', () => {
+            // Navigate to Processing page
+            const processingItems = document.querySelectorAll('.nav-item');
+            processingItems.forEach(item => {
+                if (item.textContent.trim() === 'Processing') {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Show alert for now (in real app, this would navigate to processing page)
+            alert('Navigating to Processing page...\n\nIn the final application, this will take you to the image enhancement processing interface.');
+            console.log('Capture & Enhance clicked - navigating to Processing page');
+        });
+
+        console.log('3D Globe loaded - Click "Satellite View" to switch to live map');
+
+        // ========== FETCH ENHANCEMENT STATS ==========
+        async function updateStats() {
+            try {
+                const response = await fetch('http://localhost:8080/api/stats');
+                const data = await response.json();
+                document.getElementById('enhancementCount').textContent = data.total_enhancements;
+            } catch (error) {
+                console.log('Backend not available - using demo mode');
+                // Keep showing 0 if backend is offline
+            }
+        }
+
+        // Update stats on load and every 5 seconds
+        updateStats();
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

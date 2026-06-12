@@ -1,36 +1,11 @@
-# [INSERT quickstart title here]
+# AI-Powered Satellite Imagery Enhancement
 
-> **CONTRIBUTOR TODO: update title**
->
-> Replace the H1 title above with your quickstart title
->
-> **TITLE requirements:**
-> - MAX CHAR: 64
-> - Industry use case, e.g.: "Protect patient data with LLM guardrails"
->
-> _TITLE will be extracted for publication._
-
-[Add your short description here - max 160 characters]
-
-> **CONTRIBUTOR TODO: short description**
->
-> Add a SHORT DESCRIPTION of your use case between H1 title and the Table of Contents
->
-> **SHORT DESCRIPTION requirements:**
-> - MAX CHAR: 160
-> - Describe the INDUSTRY use case
->
-> _SHORT DESCRIPTION will be extracted for publication._
+Enhance satellite imagery resolution using AI super-resolution models on Red Hat OpenShift AI for agriculture, urban planning, and environmental monitoring.
 
 ## Table of Contents
 
-> **CONTRIBUTOR TODO: update table of contents links**
->
-> This section is recommended for better navigation. The links below are examples - update them to match your actual README sections.
-
 - [Overview](#overview)
 - [Detailed description](#detailed-description)
-  - [See it in action](#see-it-in-action)
   - [Architecture diagrams](#architecture-diagrams)
 - [Requirements](#requirements)
   - [Minimum hardware requirements](#minimum-hardware-requirements)
@@ -48,389 +23,299 @@
 
 ## Overview
 
-> **CONTRIBUTOR TODO: add overview**
->
-> Write 2-4 sentences that give a high-level summary of what this quickstart does.
->
-> **Focus on:**
-> - What problem does this solve?
-> - Who is this for? (e.g., "Healthcare providers managing patient data")
-> - What will users be able to do after deploying this?
->
-> Keep it non-technical - save technical details for later sections.
+Satellite imagery provides invaluable insights into our changing planet, but resolution constraints often limit what we can see and analyze. This quickstart demonstrates how AI-powered super-resolution models can enhance satellite images, recovering fine details that would otherwise remain obscured by pixelation and atmospheric effects. Users can upload satellite imagery, select a region of interest, and watch as AI upscales 256×256 pixel selections to 512×512 resolution with improved clarity and detail.
 
 ## Detailed description
 
-> **CONTRIBUTOR TODO: add detailed description**
->
-> Write 2-3 paragraphs that expand on the overview.
->
-> **Include:**
-> - The business/industry problem in more detail
-> - How this quickstart addresses that problem
-> - Key features or capabilities users will gain
-> - Real-world scenarios where this would be used
->
-> This is about the USE CASE, not the technology. Don't explain how it works technically yet.
->
-> **Example:** "In healthcare settings, clinicians often need to quickly access patient information while ensuring HIPAA compliance. This quickstart demonstrates how AI can summarize patient records while maintaining strict data privacy through guardrails..."
+Earth observation data plays a critical role in agriculture, urban planning, disaster response, and environmental research. However, high-resolution satellite imagery is often expensive, infrequently updated, or unavailable for historical archives. This creates a gap between the data available and the level of detail needed for effective decision-making.
 
+This quickstart bridges that gap by deploying an AI-powered image enhancement platform that uses SwinIR (Swin Transformer for Image Restoration) models to perform super-resolution on satellite imagery. The application allows users to upload satellite images from any source, select a specific region of interest, and receive AI-enhanced results that recover fine structures and reduce visual artifacts.
 
-### See it in action
+Key capabilities include:
+- **2× super-resolution enhancement** from 256×256 to 512×512 display resolution
+- **Side-by-side comparison** of original and enhanced imagery
+- **Interactive region selection** for targeted enhancement
+- **Real-time processing** with progress feedback
+- **Web-based interface** accessible from any modern browser
 
-> **CONTRIBUTOR TODO: add demo links**
->
-> This section is RECOMMENDED but optional.
->
-> **Add links to:**
-> - Arcade interactive demos (preferred)
-> - YouTube/video walkthroughs
-> - Live demo instances (if available)
->
-> This helps users see the value before deploying. Many users don't have immediate access to deployment environments, so demos are crucial.
->
-> **Example:**
-> - [Try the interactive demo](https://arcade.example.com/your-demo)
-> - [Watch the 3-minute walkthrough](https://youtube.com/example)
+Real-world applications span multiple industries:
+- **Agriculture**: Enhance crop monitoring imagery to detect early signs of stress, improve field boundary detection, and analyze historical low-resolution archives
+- **Urban Planning**: Improve resolution of building and infrastructure details for development zone analysis and historical change detection
+- **Disaster Response**: Enhance damage assessment imagery after natural disasters when high-resolution imagery is unavailable or delayed
+- **Environmental Monitoring**: Improve coastal observation, forest canopy analysis, and wildlife habitat mapping
 
 ### Architecture diagrams
 
-> **CONTRIBUTOR TODO: add architecture diagram**
->
-> This section is REQUIRED.
->
-> **Include:**
-> - A clear architecture diagram showing components and data flow
-> - Put image files in `docs/images/` folder
-> - Use descriptive filenames (e.g., `architecture-overview.png`)
-> - Add alt text for accessibility
->
-> **Example:**
-> ```
-> ![Architecture diagram showing data flow from user input through LLM to output](docs/images/architecture-overview.png)
-> ```
->
-> Optionally add a brief explanation of the diagram below the image.
+![CAIsat Architecture](docs/images/architecture-diagram.png)
 
+The application follows a three-tier cloud-native architecture:
+
+1. **Frontend (React)**: Web-based UI with satellite map integration, image upload, and interactive region selection
+2. **Backend (FastAPI)**: REST API handling image preprocessing, tensor conversion, and model communication via KServe v2 protocol
+3. **Model Server (MLServer)**: ONNX runtime serving the SwinIR transformer model through OpenShift AI InferenceService
+
+All components communicate within the OpenShift cluster, with the model packaged as an OCI container image for simplified deployment without requiring external storage.
 
 ## Requirements
 
-> _This section groups all prerequisites users need before deploying_
-
 ### Minimum hardware requirements
 
-> **CONTRIBUTOR TODO: add minimum hardware requirements**
->
-> This section is REQUIRED. Be SPECIFIC - don't say "GPU", say exactly which GPU.
->
-> **Include:**
-> - CPU: specify cores, requests, and limits
-> - Memory: specify GiB, requests, and limits  
-> - GPU: exact models (e.g., "NVIDIA A10, A100, L40S, or T4")
-> - Storage: if significant storage is needed
->
-> If your quickstart deploys a model, list the model's resource requirements separately.
->
-> **Example:**
->
-> **Application:**
-> - CPU: 2 vCPU (request) / 4 vCPU (limit)
-> - Memory: 4 GiB (request) / 8 GiB (limit)
->
-> **LLM (if deploying a model):**
-> - CPU: 4 vCPU (request) / 8 vCPU (limit)
-> - Memory: 16 GiB (request) / 32 GiB (limit)
-> - GPU: 1 NVIDIA GPU (A10, A100, L40S, T4, or similar)
->
-> > **Note**: If using MaaS (external model endpoint), GPU is not required.
+**Application Components:**
+
+**Backend:**
+- CPU: 100m vCPU (request) / 500m vCPU (limit)
+- Memory: 256 MiB (request) / 512 MiB (limit)
+
+**Frontend:**
+- CPU: 50m vCPU (request) / 200m vCPU (limit)
+- Memory: 128 MiB (request) / 256 MiB (limit)
+
+**LLM/Model Server:**
+- CPU: 4 vCPU (request) / 4 vCPU (limit)
+- Memory: 6 GiB (request) / 8 GiB (limit)
+- GPU: Not required (CPU-based inference)
+
+**Total Cluster Requirements:**
+- CPU: ~4.5 vCPU minimum
+- Memory: ~9 GiB minimum
+
+> **Note**: Model inference takes approximately 30-60 seconds per image on CPU. GPU acceleration can significantly reduce processing time but is not required for this quickstart.
 
 ### Minimum software requirements
 
-> **CONTRIBUTOR TODO: add minimum software requirements**
->
-> This section is REQUIRED. Be SPECIFIC about versions.
->
-> **Include:**
-> - OpenShift version (e.g., "OpenShift 4.14 or later")
-> - OpenShift AI version (e.g., "OpenShift AI 2.22 or later")
-> - Other platform dependencies (operators, services)
-> - Client tools (oc CLI, helm, etc.)
->
-> **BAD:** "Requires OpenShift AI"  
-> **GOOD:** "Tested with OpenShift AI 2.22-2.25 on OpenShift 4.14+"
+This quickstart has been tested with:
+- **OpenShift**: 4.12 or later
+- **OpenShift AI**: 2.22 or later with KServe/ModelMesh serving installed
+- **Helm**: 3.12 or later
+- **oc CLI**: 4.12 or later
+
+The OpenShift AI operator must be installed with the following components:
+- KServe serving stack (for InferenceService support)
+- MLServer runtime (for ONNX model serving)
 
 ### Required user permissions
 
-> **CONTRIBUTOR TODO: add user permissions**
->
-> This section is REQUIRED. Be clear about what permissions are needed.
->
-> **Options:**
-> - Regular user with standard permissions (preferred!)
-> - Namespace admin
-> - Cluster admin (only if absolutely necessary - explain why)
->
-> **Example:**
->
-> This quickstart can be deployed by any user with:
-> - Permission to create projects/namespaces
-> - Permission to deploy applications via Helm
-> - No cluster admin access required
+This quickstart can be deployed by any user with:
+- Permission to create projects/namespaces in OpenShift
+- Permission to deploy applications via Helm charts
+- Permission to create InferenceService resources (OpenShift AI custom resources)
+- No cluster admin access required
 
+Standard OpenShift AI data scientist or developer roles are sufficient.
 
 ## Deploy
 
-> _This section contains all deployment instructions_
-
 ### Prerequisites
 
-> **CONTRIBUTOR TODO: verify and update prerequisites**
->
-> List specific items users must have/do BEFORE running installation commands.
->
-> **Include:**
-> - Access to specific platforms/clusters
-> - CLI tools installed (with version requirements)
-> - Authentication/credentials needed
-> - Network access requirements
->
-> **Example:**
->
-> Before deploying, ensure you have:
-> - Access to a Red Hat OpenShift cluster with OpenShift AI 2.22+ installed
-> - `oc` CLI (version 4.14+) installed and authenticated
-> - `helm` CLI (version 3.12+) installed
-> - API key for your model endpoint (if using MaaS)
+Before deploying, ensure you have:
+- Access to a Red Hat OpenShift cluster (4.12+) with OpenShift AI (2.22+) installed
+- `oc` CLI (version 4.12+) installed and authenticated to your cluster
+- `helm` CLI (version 3.12+) installed
+- The KServe serving stack enabled in OpenShift AI
+- Sufficient cluster resources (see [Minimum hardware requirements](#minimum-hardware-requirements))
 
 ### Installation
 
-> **CONTRIBUTOR TODO: customize installation steps**
->
-> Provide STEP-BY-STEP instructions. Assume users have limited knowledge.
->
-> **Include:**
-> - Clear numbered steps
-> - Exact commands to run (users should be able to copy/paste)
-> - Explanation of what each major step does
-> - Any configuration choices users need to make
->
-> Test these steps yourself on a fresh environment to ensure they work!
->
-> **Key things to update:**
-> - Replace "my-quickstart" and "YOUR_QUICKSTART_NAME" with your actual names
-> - Add any additional --set flags specific to your quickstart
-> - If your quickstart requires a model, keep the model options section below
-> - If your quickstart does NOT require a model, remove the model options section below entirely
-
 1. Clone the repository:
 ```bash
-git clone https://github.com/rh-ai-quickstart/YOUR_QUICKSTART_NAME.git
-cd YOUR_QUICKSTART_NAME
+git clone https://github.com/rh-ai-quickstart/caisat.git
+cd caisat
 ```
 
 2. Create a new OpenShift project:
 ```bash
-PROJECT="my-quickstart"
+PROJECT="caisat"
 oc new-project ${PROJECT}
 ```
 
 3. Install using Helm:
 
-```bash
-helm install my-quickstart ./chart --namespace ${PROJECT}
-```
-
-#### If your quickstart requires a model
-
-**Option A: Use your own model (MaaS - Model as a Service)**
-
-If you have an existing model endpoint, provide the model name, endpoint, and API key:
-```bash
-helm install my-quickstart ./chart --namespace ${PROJECT} \
-  --set model.name=YOUR_MODEL_NAME \
-  --set model.endpoint=YOUR_MODEL_ENDPOINT \
-  --set model.api_key=YOUR_API_KEY
-```
-
-> **Note**: The `model.endpoint` should be the full URL including protocol and port if needed (e.g., `https://my-model.example.com` or `http://my-model:8080`).
-
-**Option B: Deploy with a model included in the chart**
-
-If you don't provide any model configuration, the chart will deploy a default model on your cluster:
-```bash
-helm install my-quickstart ./chart --namespace ${PROJECT}
-```
-
-> **Note**: Option B requires a GPU available in your cluster for the LLM deployment. See [Minimum hardware requirements](#minimum-hardware-requirements) for details. You must add your own model InferenceService template under `chart/templates/` for this option to work.
-
-#### Testing model access (before deploying)
-
-If you are bringing your own model (Option A), you can verify the endpoint is reachable **before** installing the chart:
+The chart includes the model deployment by default. Simply run:
 
 ```bash
-oc run test-model-access --rm -it --restart=Never \
-  --image=registry.access.redhat.com/ubi9/ubi-minimal:latest \
-  -- /bin/sh -c 'curl -sf --max-time 10 \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d "{\"model\": \"YOUR_MODEL_NAME\", \"messages\": [{\"role\": \"user\", \"content\": \"Say hello in one word.\"}], \"max_tokens\": 10}" \
-    "YOUR_MODEL_ENDPOINT/v1/chat/completions" && echo "" && echo "SUCCESS" || echo "FAILED"'
+helm install caisat ./chart --namespace ${PROJECT}
 ```
 
-Replace `YOUR_API_KEY`, `YOUR_MODEL_NAME`, and `YOUR_MODEL_ENDPOINT` with your actual values.
+This will deploy:
+- SwinIR model as a KServe InferenceService
+- FastAPI backend with automatic model endpoint configuration
+- React frontend with OpenShift Route for external access
+
+The installation takes approximately 3-5 minutes as the model container image is pulled and the InferenceService initializes.
+
+> **Note**: The model is packaged as an OCI container image (`quay.io/sara_banderby/csi_cai:model`), so no separate model upload or data connection configuration is needed.
 
 ### Validating the deployment
 
-> **CONTRIBUTOR TODO: add validation steps**
->
-> Tell users how to verify the deployment was successful.
->
-> **Include:**
-> - Commands to check pod status
-> - How to access the application (routes, URLs)
-> - How to verify functionality (e.g., "run helm test")
-> - Expected output/behavior
->
-> **Example:**
->
-> 1. Check all pods are running:
->    ```bash
->    oc get pods -n ${PROJECT}
->    ```
->    
-> 2. Get the application URL:
->    ```bash
->    echo https://$(oc get route/my-app -n ${PROJECT} --template='{{.spec.host}}')
->    ```
->    
-> 3. Test the endpoint is responding:
->    ```bash
->    curl -s https://$(oc get route/my-app -n ${PROJECT} --template='{{.spec.host}}')/health
->    ```
->
-> If your quickstart uses a model, you can run the included Helm test:
-> ```bash
-> helm test my-quickstart --namespace ${PROJECT}
-> ```
->
-> If your quickstart does not use a model, remove the helm test step and add your own validation steps.
+1. Check that all pods are running:
+```bash
+oc get pods -n ${PROJECT}
+```
+
+Expected output should show:
+- `caisat-backend-*`: Running
+- `caisat-frontend-*`: Running  
+- `swinir-predictor-*`: Running (model server)
+
+2. Verify the InferenceService is ready:
+```bash
+oc get inferenceservice swinir -n ${PROJECT}
+```
+
+Wait until the `READY` column shows `True`.
+
+3. Get the application URL:
+```bash
+echo https://$(oc get route caisat -n ${PROJECT} --template='{{.spec.host}}')
+```
+
+4. Open the URL in your browser. You should see the CAIsat application interface with:
+   - A satellite map view
+   - Upload button for satellite imagery
+   - Status indicator showing "System Online"
+
+5. Test the enhancement functionality:
+   - Upload a satellite image (or capture from the embedded map)
+   - Position the selection box over an area of interest
+   - Click "Enhance Selection"
+   - Wait for processing (30-60 seconds)
+   - View the side-by-side comparison of original and enhanced imagery
 
 ### Delete
 
-> **CONTRIBUTOR TODO: verify deletion steps**
->
-> Provide clear instructions to cleanly remove the deployment.
->
-> **Include:**
-> - Command to uninstall via Helm
-> - Any manual cleanup needed (secrets, PVCs, etc.)
-> - How to verify complete removal
->
-> Users should be able to return their environment to pre-deployment state.
->
-> **Example:**
->
-> To completely remove the deployment:
->
-> 1. Uninstall the Helm release:
->    ```bash
->    helm uninstall my-quickstart --namespace ${PROJECT}
->    ```
->
-> 2. (Optional) Delete the project:
->    ```bash
->    oc delete project ${PROJECT}
->    ```
+To completely remove the deployment:
+
+1. Uninstall the Helm release:
+```bash
+helm uninstall caisat --namespace ${PROJECT}
+```
+
+2. (Optional) Delete the project and all resources:
+```bash
+oc delete project ${PROJECT}
+```
+
+This will remove all deployed components including the model InferenceService, backend, frontend, routes, and associated resources.
 
 ## Repository structure
 
-> **CONTRIBUTOR TODO: update the file tree**
->
-> Show the organization of your repository so contributors understand where things are.
->
-> Update this to reflect your actual structure - add application code directories, additional config folders, etc.
->
-> Keep it concise - don't list every single file, just the important directories and key files.
-
 ```
 .
-├── chart/                    # Helm chart for deploying the quickstart
+├── backend/                  # FastAPI backend service
+│   ├── app.py                # Main API application
+│   ├── requirements.txt      # Python dependencies
+│   └── Containerfile         # Container build definition
+├── frontend/                 # React frontend application
+│   ├── src/
+│   │   ├── App.js            # Main React component
+│   │   ├── App.css           # Styling
+│   │   └── Telescope.js      # Satellite icon component
+│   ├── public/               # Static assets
+│   ├── package.json          # Node.js dependencies
+│   └── build/                # Production build output
+├── model-container/          # OCI model packaging
+│   ├── README.md             # Model packaging documentation
+│   ├── build-swinir.sh       # Model conversion script
+│   ├── build.sh              # Container build script
+│   └── Containerfile         # Model container definition
+├── chart/                    # Helm chart for deployment
 │   ├── Chart.yaml            # Chart metadata
-│   ├── values.yaml           # Default configuration values (model info, resources, etc.)
+│   ├── values.yaml           # Configuration values
+│   ├── README.md             # Helm chart documentation
 │   └── templates/            # Kubernetes resource templates
-│       ├── test-model-access.yaml  # Helm test for verifying model connectivity
-│       └── ...               # Add your templates here (deployments, services, etc.)
+│       ├── inferenceservice.yaml     # KServe model deployment
+│       ├── servingruntime.yaml       # MLServer runtime config
+│       ├── backend-deployment.yaml   # Backend deployment
+│       ├── backend-service.yaml      # Backend service
+│       ├── backend-route.yaml        # Backend route
+│       ├── frontend-deployment.yaml  # Frontend deployment
+│       ├── frontend-service.yaml     # Frontend service
+│       ├── route.yaml                # Frontend route (main UI)
+│       ├── configmap.yaml            # Environment configuration
+│       └── model-secret.yaml         # Model configuration
 ├── docs/
 │   └── images/               # Architecture diagrams and screenshots
 └── README.md
 ```
 
-> **EXAMPLE:** If your quickstart includes application source code (e.g., a web UI, API server), add it as a sibling directory to chart/. For example:
-> ```
-> ├── my-app/                 # Application source code
-> │   ├── app.py
-> │   ├── Containerfile
-> │   └── requirements.txt
-> ```
-
 ## References
 
-> **CONTRIBUTOR TODO: add relevant links**
->
-> This section is RECOMMENDED but optional.
->
-> **Include links to:**
-> - Official documentation for technologies used
-> - Blog posts or articles about the use case
-> - Research papers or whitepapers
-> - Related quickstarts or examples
-> - Partner/vendor documentation
->
-> **Example:**
-> - [OpenShift AI Documentation](https://docs.redhat.com/en/openshift-ai)
-> - [LangChain Documentation](https://langchain.com/docs)
-> - [Blog: Building HIPAA-Compliant AI Applications](https://example.com/blog)
->
-> _Remove this section entirely if you have no references to add._
+- [OpenShift AI Documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed)
+- [KServe InferenceService API](https://kserve.github.io/website/latest/modelserving/v1beta1/serving_runtime/)
+- [SwinIR: Image Restoration using Swin Transformer](https://github.com/JingyunLiang/SwinIR)
+- [MLServer ONNX Runtime](https://mlserver.readthedocs.io/en/latest/runtimes/onnx.html)
+- [KServe V2 Inference Protocol](https://docs.seldon.io/projects/seldon-core/en/latest/reference/apis/v2-protocol.html)
 
 ## Technical details
 
-> **CONTRIBUTOR TODO: add technical deep dive**
->
-> This section is OPTIONAL.
->
-> **Use this for:**
-> - How the components work together technically
-> - Implementation details developers would want to know
-> - Model details (size, quantization, context window)
-> - API endpoints and integration points
-> - Performance characteristics
->
-> This is where technical depth goes - the earlier sections focus on the use case.
->
-> _Remove this section if not needed._
+### Model Architecture
+
+This quickstart uses **SwinIR** (Swin Transformer for Image Restoration), a state-of-the-art transformer-based model for image super-resolution. The model has been converted to ONNX format for optimized inference on CPU.
+
+**Model Specifications:**
+- Input: 256×256 RGB image (3 channels, FP32)
+- Output: 1024×1024 RGB image (4× upscaling)
+- Display: Resized to 512×512 (2×) for better usability
+- Framework: ONNX Runtime via MLServer
+- Parameters: ~11.7M
+- Processing time: ~30-60 seconds per image (CPU)
+
+### Data Flow
+
+1. User uploads image or captures from satellite map view
+2. Frontend sends selected 256×256 region to backend (`/api/enhance` endpoint)
+3. Backend preprocesses image:
+   - Converts to RGB if needed
+   - Resizes to 256×256
+   - Normalizes to [0, 1] range
+   - Transforms from HWC to CHW format (channels first)
+   - Adds batch dimension
+4. Backend sends KServe v2 inference request to model endpoint
+5. MLServer processes request through ONNX runtime
+6. Model returns 1024×1024 enhanced image
+7. Backend postprocesses output:
+   - Removes batch dimension
+   - Converts CHW to HWC format
+   - Clips values and converts to uint8
+   - Resizes to 512×512 for display
+8. Frontend receives enhanced image and displays side-by-side comparison
+
+### API Endpoints
+
+**Backend:**
+- `GET /`: Health check with model endpoint info
+- `GET /health`: Kubernetes liveness/readiness probe
+- `POST /api/enhance`: Image enhancement endpoint (accepts multipart/form-data)
+
+**Model Inference:**
+- KServe v2 protocol at `/v2/models/{model-name}/infer`
+- Request/response format follows KServe inference protocol specification
+
+### Container Images
+
+Pre-built images are available on Quay.io:
+- **Frontend**: `quay.io/sara_banderby/caisat:frontend`
+- **Backend**: `quay.io/sara_banderby/caisat:backend`
+- **Model**: `quay.io/sara_banderby/csi_cai:model`
+
+### Important Notice
+
+The AI enhancement process performs super-resolution, denoising, and artifact removal. While the model improves apparent image sharpness and recovers visually plausible details, it infers features from learned patterns rather than physical measurements.
+
+**Limitations:**
+- Reconstructed features may not accurately reflect original ground truth
+- Performance degrades with heavily pixelated, blurred, or compressed inputs
+- Does not preserve spectral signatures, radiometric calibration, or other scientific properties
+- Enhanced features should be interpreted as visual approximations for exploration and presentation, not for quantitative scientific analysis
+
+For production scientific workflows, consult domain experts about appropriate use of AI-enhanced imagery.
 
 ## Tags
 
-> **CONTRIBUTOR TODO: add metadata and tags for publication**
->
-> Tags are REQUIRED for publication to redhat.com catalog.
->
-> **Fill in:**
-> - **Title:** (must match H1 heading, max 64 chars)
-> - **Description:** (must match short description, max 160 chars)
-> - **Industry:** ONE from the list in CONTRIBUTING.md (e.g., Healthcare, Retail, Financial Services)
-> - **Product:** Primary Red Hat product (e.g., OpenShift AI, OpenShift, RHEL)
-> - **Use case:** Optional descriptor (e.g., security, automation, productivity)
-> - **Partner:** Optional, list partners if applicable (e.g., NVIDIA, Intel)
-> - **Contributor org:** Defaults to "Red Hat" unless partner or community contribution
->
-> **Example:**
->
-> **Title:** Protect patient data with LLM guardrails  
-> **Description:** Deploy HIPAA-compliant AI assistants for healthcare with built-in data protection and audit logging  
-> **Industry:** Healthcare provider  
-> **Product:** OpenShift AI  
-> **Use case:** Security, compliance  
-> **Partner:** N/A  
-> **Contributor org:** Red Hat
+**Title:** AI-Powered Satellite Imagery Enhancement  
+**Description:** Enhance satellite imagery resolution using AI super-resolution models on Red Hat OpenShift AI for agriculture, urban planning, and environmental monitoring  
+**Industry:** Cross-industry  
+**Product:** OpenShift AI  
+**Use case:** Image processing, AI/ML inference, geospatial analysis  
+**Partner:** N/A  
+**Contributor org:** Red Hat

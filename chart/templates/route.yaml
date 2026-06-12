@@ -1,0 +1,23 @@
+{{- if .Values.frontend.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "zoom-enhance.fullname" . }}
+  labels:
+    {{- include "zoom-enhance.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  {{- if .Values.frontend.route.host }}
+  host: {{ .Values.frontend.route.host }}
+  {{- end }}
+  to:
+    kind: Service
+    name: {{ include "zoom-enhance.fullname" . }}-frontend
+  port:
+    targetPort: http
+  {{- if .Values.frontend.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.frontend.route.tls.termination }}
+    insecureEdgeTerminationPolicy: Redirect
+  {{- end }}
+{{- end }}

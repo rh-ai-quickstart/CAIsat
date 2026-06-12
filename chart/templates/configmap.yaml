@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "zoom-enhance.fullname" . }}-config
+  labels:
+    {{- include "zoom-enhance.labels" . | nindent 4 }}
+data:
+  model-endpoint: {{ include "zoom-enhance.modelEndpoint" . | quote }}

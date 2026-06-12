@@ -1,0 +1,27 @@
+FROM registry.access.redhat.com/ubi9/nodejs-18
+
+# Update packages for CVE fixes
+USER 0
+RUN dnf update -y && dnf clean all
+USER 1001
+
+WORKDIR /opt/app-root/src
+
+# Install dependencies
+COPY --chown=1001:0 package*.json ./
+RUN npm install
+
+# Copy source
+COPY --chown=1001:0 public/ ./public/
+COPY --chown=1001:0 src/ ./src/
+
+# Build
+RUN npm run build
+
+# Install serve to serve static files
+RUN npm install -g serve
+
+EXPOSE 8080
+
+# Serve the build directory
+CMD ["serve", "-s", "build", "-l", "8080"]

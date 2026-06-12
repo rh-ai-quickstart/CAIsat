@@ -1,0 +1,35 @@
+{{- if .Values.model.deploy }}
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: {{ .Values.model.name }}
+  labels:
+    {{- include "zoom-enhance.labels" . | nindent 4 }}
+    app.kubernetes.io/component: model
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+  annotations:
+    serving.kserve.io/deploymentMode: "Standard"
+    security.opendatahub.io/enable-auth: "false"
+    modelFormat: "onnx"
+    opendatahub.io/model-type: "predictive"
+    openshift.io/display-name: {{ .Values.model.name }}
+    openshift.io/description: ""
+    opendatahub.io/connections: {{ .Values.model.name }}
+spec:
+  predictor:
+    deploymentStrategy:
+      type: RollingUpdate
+    minReplicas: 1
+    maxReplicas: 1
+    timeout: 300
+    model:
+      modelFormat:
+        name: onnx
+        version: "1"
+      name: ""
+      runtime: {{ .Values.model.runtime }}
+      storageUri: "oci://{{ .Values.model.image.repository }}:{{ .Values.model.image.tag }}"
+      resources:
+        {{- toYaml .Values.model.resources | nindent 8 }}
+{{- end }}

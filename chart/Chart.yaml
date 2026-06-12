@@ -1,8 +1,15 @@
 apiVersion: v2
-name: my-quickstart
-description: A Helm chart for deploying an AI quickstart on OpenShift AI
+name: caisat
+description: A Helm chart for deploying AI-powered satellite imagery enhancement on OpenShift AI
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
+keywords:
+  - ai
+  - satellite
+  - earth-observation
+  - image-enhancement
+  - swinir
+  - super-resolution
 maintainers:
-  - name: CONTRIBUTOR_NAME
+  - name: CAI Team
