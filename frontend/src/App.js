@@ -153,8 +153,9 @@ function App() {
   };
 
   const handleMouseDown = (e) => {
-    if (e.shiftKey) {
-      // Shift + drag = pan
+    if (e.shiftKey || e.button === 1) {
+      // Shift + drag OR middle mouse = pan
+      e.preventDefault();
       setPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
       return;
@@ -178,6 +179,7 @@ function App() {
 
   const handleMouseMove = (e) => {
     if (panning) {
+      e.preventDefault();
       setPan({
         x: e.clientX - panStart.x,
         y: e.clientY - panStart.y
@@ -212,8 +214,27 @@ function App() {
 
   const handleWheel = (e) => {
     e.preventDefault();
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Calculate point in image coordinates before zoom
+    const pointX = (mouseX - pan.x) / zoom;
+    const pointY = (mouseY - pan.y) / zoom;
+
+    // Calculate new zoom
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prevZoom => Math.max(1, Math.min(prevZoom * delta, 5)));
+    const newZoom = Math.max(1, Math.min(zoom * delta, 5));
+
+    // Calculate new pan to keep the same point under the mouse
+    const newPan = {
+      x: mouseX - pointX * newZoom,
+      y: mouseY - pointY * newZoom
+    };
+
+    setZoom(newZoom);
+    setPan(newPan);
   };
 
   const handleEnhance = async () => {
@@ -280,8 +301,27 @@ function App() {
           <span>CAIsat</span>
         </div>
         <div className="nav">
-          <div className="nav-item active">Earth View</div>
-          <div className="nav-item">Processing</div>
+          <div
+            className={`nav-item ${view === 'globe' || view === 'map' ? 'active' : ''}`}
+            onClick={() => {
+              setView('globe');
+              setCapturedImage(null);
+              setCroppedImage(null);
+              setEnhancedImage(null);
+            }}
+          >
+            Earth View
+          </div>
+          <div
+            className={`nav-item ${view === 'processing' ? 'active' : ''}`}
+            onClick={() => {
+              if (capturedImage) {
+                setView('processing');
+              }
+            }}
+          >
+            Processing
+          </div>
         </div>
         <div className="status">
           <div className={`status-dot ${systemOnline ? 'online' : ''}`}></div>
@@ -406,25 +446,40 @@ function App() {
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
                         onWheel={handleWheel}
+                        onContextMenu={(e) => e.preventDefault()}
                         style={{
-                          cursor: panning ? 'grabbing' : dragging ? 'grabbing' : 'grab',
-                          overflow: 'hidden'
+                          cursor: panning ? 'grabbing' : dragging ? 'move' : 'grab',
+                          overflow: 'hidden',
+                          border: '2px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '4px',
+                          maxWidth: '90%',
+                          maxHeight: '70vh',
+                          position: 'relative',
+                          userSelect: 'none'
                         }}
                       >
                         <div style={{
                           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                           transformOrigin: '0 0',
                           position: 'relative',
-                          display: 'inline-block'
+                          display: 'inline-block',
+                          transition: panning || dragging ? 'none' : 'transform 0.1s ease-out'
                         }}>
-                          <img src={capturedImage} alt="Captured map" className="crop-base-image" />
+                          <img
+                            src={capturedImage}
+                            alt="Captured map"
+                            className="crop-base-image"
+                            draggable="false"
+                            style={{ pointerEvents: 'none' }}
+                          />
                           <div
                             className="crop-box"
                             style={{
                               left: `${cropArea.x}px`,
                               top: `${cropArea.y}px`,
                               width: `${cropArea.size}px`,
-                              height: `${cropArea.size}px`
+                              height: `${cropArea.size}px`,
+                              pointerEvents: 'none'
                             }}
                           >
                             <div className="crop-label">256×256</div>
