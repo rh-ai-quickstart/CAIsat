@@ -523,6 +523,101 @@ body {
     font-size: 14px;
 }
 
+/* Collapsed result panels */
+.result-panel-collapsed {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+}
+
+.result-panel-collapsed:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.result-panel-collapsed h4 {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin: 0;
+}
+
+.result-panel h4 {
+    user-select: none;
+}
+
+/* Rerun button */
+.rerun-detect-btn {
+    padding: 12px 30px;
+    background: rgba(68, 68, 255, 0.2);
+    border: 2px solid #4444ff;
+    border-radius: 24px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.rerun-detect-btn:hover {
+    background: rgba(68, 68, 255, 0.4);
+    transform: scale(1.05);
+}
+
+/* No detections message */
+.no-detections {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 30px 0;
+}
+
+.no-detections p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Detection info section */
+.detection-info {
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(68, 68, 255, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(68, 68, 255, 0.3);
+}
+
+.detection-info h4 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.classes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.class-badge {
+    background: rgba(68, 68, 255, 0.3);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(68, 68, 255, 0.5);
+    text-transform: capitalize;
+}
+
 /* Results Section */
 .results-section {
     text-align: center;

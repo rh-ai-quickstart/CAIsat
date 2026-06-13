@@ -21,7 +21,18 @@ function App() {
   const [detecting, setDetecting] = useState(false);
   const [detections, setDetections] = useState(null);
   const [detectedImage, setDetectedImage] = useState(null);
+  const [showOriginal, setShowOriginal] = useState(true);
+  const [showEnhanced, setShowEnhanced] = useState(true);
+  const [showDetected, setShowDetected] = useState(true);
   const [popup, setPopup] = useState(null); // 'purpose', 'guide', 'disclaimer', or null
+
+  // Detection classes
+  const DETECTION_CLASSES = [
+    'plane', 'ship', 'storage-tank', 'baseball-diamond', 'tennis-court',
+    'basketball-court', 'ground-track-field', 'harbor', 'bridge',
+    'large-vehicle', 'small-vehicle', 'helicopter', 'roundabout',
+    'soccer-ball-field', 'swimming-pool'
+  ];
   const globeRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -607,23 +618,55 @@ function App() {
                 {!processing && croppedImage && enhancedImage && (
                   <div className="results-section">
                     <h3>Enhancement Complete</h3>
+
+                    {/* Collapsible Results Container */}
                     <div className="results-container">
-                      <div className="result-panel">
-                        <h4>Original (256×256)</h4>
-                        <img src={croppedImage} alt="Original crop" />
-                      </div>
-                      <div className="result-arrow">→</div>
-                      <div className="result-panel">
-                        <h4>Enhanced (512×512)</h4>
-                        <img src={enhancedImage} alt="Enhanced" />
-                      </div>
+                      {showOriginal && (
+                        <div className="result-panel">
+                          <h4 onClick={() => setShowOriginal(!showOriginal)} style={{cursor: 'pointer'}}>
+                            Original (256×256) {showOriginal ? '▼' : '▶'}
+                          </h4>
+                          <img src={croppedImage} alt="Original crop" />
+                        </div>
+                      )}
+                      {!showOriginal && (
+                        <div className="result-panel-collapsed" onClick={() => setShowOriginal(true)}>
+                          <h4>Original ▶</h4>
+                        </div>
+                      )}
+
+                      {(showOriginal || showEnhanced || showDetected) && <div className="result-arrow">→</div>}
+
+                      {showEnhanced && (
+                        <div className="result-panel">
+                          <h4 onClick={() => setShowEnhanced(!showEnhanced)} style={{cursor: 'pointer'}}>
+                            Enhanced (512×512) {showEnhanced ? '▼' : '▶'}
+                          </h4>
+                          <img src={enhancedImage} alt="Enhanced" />
+                        </div>
+                      )}
+                      {!showEnhanced && (
+                        <div className="result-panel-collapsed" onClick={() => setShowEnhanced(true)}>
+                          <h4>Enhanced ▶</h4>
+                        </div>
+                      )}
+
                       {detectedImage && (
                         <>
-                          <div className="result-arrow">→</div>
-                          <div className="result-panel">
-                            <h4>Detected Objects ({detections?.count || 0})</h4>
-                            <img src={detectedImage} alt="Detected" />
-                          </div>
+                          {(showEnhanced || showDetected) && <div className="result-arrow">→</div>}
+                          {showDetected && (
+                            <div className="result-panel">
+                              <h4 onClick={() => setShowDetected(!showDetected)} style={{cursor: 'pointer'}}>
+                                Detected Objects ({detections?.count || 0}) {showDetected ? '▼' : '▶'}
+                              </h4>
+                              <img src={detectedImage} alt="Detected" />
+                            </div>
+                          )}
+                          {!showDetected && (
+                            <div className="result-panel-collapsed" onClick={() => setShowDetected(true)}>
+                              <h4>Detected ({detections?.count || 0}) ▶</h4>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -632,7 +675,7 @@ function App() {
                     {!detecting && !detectedImage && (
                       <div className="detection-section">
                         <button className="detect-btn" onClick={handleDetect}>
-                          🛰️ Detect Objects
+                          Detect Objects
                         </button>
                         <p className="detection-hint">Analyze enhanced image for planes, ships, vehicles, and more</p>
                       </div>
@@ -647,18 +690,55 @@ function App() {
                       </div>
                     )}
 
+                    {/* Detection Results */}
                     {detections && detectedImage && (
-                      <div className="detections-list">
-                        <h4>Detected Objects:</h4>
-                        <div className="detections-grid">
-                          {detections.detections.slice(0, 10).map((det, idx) => (
-                            <div key={idx} className="detection-item">
-                              <span className="detection-class">{det.class}</span>
-                              <span className="detection-confidence">{(det.confidence * 100).toFixed(1)}%</span>
+                      <>
+                        {detections.count > 0 ? (
+                          <div className="detections-list">
+                            <h4>Detected Objects:</h4>
+                            <div className="detections-grid">
+                              {detections.detections.slice(0, 10).map((det, idx) => (
+                                <div key={idx} className="detection-item">
+                                  <span className="detection-class">{det.class}</span>
+                                  <span className="detection-confidence">{(det.confidence * 100).toFixed(1)}%</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+
+                            {/* Rerun Detection Button */}
+                            <div style={{marginTop: '20px', textAlign: 'center'}}>
+                              <button className="rerun-detect-btn" onClick={() => {
+                                setDetectedImage(null);
+                                setDetections(null);
+                                handleDetect();
+                              }}>
+                                ↻ Rerun Detection
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="no-detections">
+                            <p>No detections flagged</p>
+                            <button className="rerun-detect-btn" onClick={() => {
+                              setDetectedImage(null);
+                              setDetections(null);
+                              handleDetect();
+                            }}>
+                              ↻ Rerun Detection
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Detectable Classes Info */}
+                        <div className="detection-info">
+                          <h4>Detectable Classes:</h4>
+                          <div className="classes-grid">
+                            {DETECTION_CLASSES.map((cls, idx) => (
+                              <span key={idx} className="class-badge">{cls}</span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     <div className="result-actions">
@@ -668,6 +748,9 @@ function App() {
                         setEnhancedImage(null);
                         setDetectedImage(null);
                         setDetections(null);
+                        setShowOriginal(true);
+                        setShowEnhanced(true);
+                        setShowDetected(true);
                       }}>
                         ← Back to Map
                       </button>
