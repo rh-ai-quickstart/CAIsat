@@ -174,13 +174,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 3. **Access the application**:
    - Open the route URL from step 5 of Installation in your web browser
    - You should see the CAIsat interface with a rotating 3D Earth
-   - Click "Satellite View" to access the live satellite map
-   - Navigate to any location, click "Capture & Enhance"
-   - Drag the red 256×256 box over your region of interest
-   - Click "Enhance Selected Area"
-   - The enhanced image should appear within 5-10 seconds
-   - Click "Detect Objects" to analyze the enhanced image
-   - Detected objects (planes, ships, vehicles, etc.) will be highlighted with bounding boxes
+   - Try the full workflow described in [How It Works](#how-it-works) to verify enhancement and detection are functioning
 
 ### Deletion
 
