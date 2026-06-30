@@ -8,7 +8,7 @@ Use case: Satellite Image Processing
 
 # AI-Powered Satellite Imagery Enhancement & Object Detection
 
-Deploy AI-powered resolution enhancement and object detection for satellite imagery using OpenShift AI on Red Hat OpenShift.
+Deploy AI-powered resolution enhancement, object detection, and change detection for satellite imagery using OpenShift AI on Red Hat OpenShift.
 
 ![CAIsat web interface showing 3D rotating Earth globe, interactive satellite map with live imagery, drag-and-drop selection box for 256×256 regions, zoom controls, and AI-enhanced satellite images with side-by-side comparison](docs/images/CAIsat.png)
 
@@ -32,7 +32,7 @@ Deploy AI-powered resolution enhancement and object detection for satellite imag
 
 ## Overview
 
-Welcome to CAIsat, where you can gaze upon Earth from space, enhance satellite imagery, and detect objects with the power of AI. This application lets users navigate live satellite maps, capture regions to enhance from 256×256 to 512×512 resolution using the SwinIR deep learning model, and detect objects like planes, ships, vehicles, and infrastructure using YOLOv8-OBB — all running on Red Hat OpenShift AI.
+Welcome to CAIsat, where you can gaze upon Earth from space, enhance satellite imagery, detect objects, and track changes over time with the power of AI. This application lets users navigate live satellite maps, capture regions to enhance from 256×256 to 512×512 resolution using the SwinIR deep learning model, detect objects like planes, ships, vehicles, and infrastructure using YOLOv8-OBB, and monitor pre-analyzed locations with automated change detection using Sentinel2 — all running on Red Hat OpenShift AI.
 
 ---
 
@@ -46,6 +46,7 @@ Welcome to CAIsat, where you can gaze upon Earth from space, enhance satellite i
 │  • Drag-and-drop selection box (256×256 region)                 │
 │  • Mouse wheel zoom for detail inspection                       │
 │  • Before/after/detected comparison view                        │
+│  • Monitored Areas with timeline charts                         │
 │  • Collapsible image panels                                     │
 │  • Bounding box visualization                                   │
 └──────┬──────────────────────────────────────────────────────────┘
@@ -69,13 +70,16 @@ Welcome to CAIsat, where you can gaze upon Earth from space, enhance satellite i
 └────────────────────────────────┘  └────────────────────────────┘
 ```
 
-The application consists of five containerized components deployed on OpenShift:
+The application consists of eight containerized components deployed on OpenShift:
 
-1. **Frontend (React)**: 3D Earth globe, interactive satellite map, drag-and-drop selection box, zoom controls, and collapsible detection results
+1. **Frontend (React)**: 3D Earth globe, interactive satellite map, drag-and-drop selection box, zoom controls, monitored areas with timeline charts, and collapsible detection results
 2. **Enhancement Backend (FastAPI)**: Image preprocessing, crop extraction, tensor conversion, and KServe communication for SwinIR
 3. **Detection Backend (FastAPI)**: Image preprocessing, YOLO inference coordination, NMS post-processing, and bounding box visualization
-4. **SwinIR Model Server (OpenShift AI)**: ONNX model served via MLServer for 2× resolution enhancement
-5. **YOLOv8-OBB Model Server (OpenShift AI)**: ONNX model served via MLServer for object detection in satellite imagery
+4. **Change Detection Backend (FastAPI)**: Time series data retrieval, trend analysis, and change metrics from S3 storage
+5. **SwinIR Model Server (OpenShift AI)**: ONNX model served via MLServer for 2× resolution enhancement
+6. **YOLOv8-OBB Model Server (OpenShift AI)**: ONNX model served via MLServer for object detection in satellite imagery
+7. **Sentinel2 Model Server (OpenShift AI)**: ONNX model served via MLServer for change detection analysis
+8. **S4 Storage & Data Science Pipelines**: S3-compatible storage with automated change analysis pipeline
 
 Activate satellite view to browse satellite imagery, capture a screenshot, select a 256×256 region of interest, enhance it to 512×512, then detect objects like planes, ships, and vehicles with bounding boxes.
 
@@ -130,12 +134,16 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 
 3. **Deploy the application using Helm**:
    ```bash
-   helm install caisat ./chart \
-     --namespace caisat \
-     --set model.deploy=true
+   helm install caisat ./chart --namespace caisat
    ```
 
-4. **Wait for all pods to be ready** (this may take 2-3 minutes):
+   **What happens automatically:**
+   - S4 storage deploys and seeds with 56 satellite images from NASA GIBS (4 locations × 14 days)
+   - All three AI models deploy: SwinIR, YOLO, Sentinel2
+   - Analysis pipeline runs automatically, generating change detection metrics
+   - Results appear in the "Monitored Areas" tab
+
+4. **Wait for deployment to complete** (this may take 8-10 minutes for full pipeline execution):
    ```bash
    oc get pods -n caisat -w
    ```
@@ -152,22 +160,25 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    oc get pods -n caisat
    ```
    
-   Expected output showing 5 running pods:
+   Expected output showing application pods:
    ```
    NAME                                          READY   STATUS    RESTARTS   AGE
-   caisat-backend-xxxxxxxxx-xxxxx                1/1     Running   0          2m
-   caisat-detection-backend-xxxxxxxxx-xxxxx      1/1     Running   0          2m
-   caisat-frontend-xxxxxxxxx-xxxxx               1/1     Running   0          2m
-   swinir-predictor-xxxxxxxxx-xxxxx              2/2     Running   0          2m
-   yolov8m-satelite-predictor-xxxxxxxxx-xxxxx    2/2     Running   0          2m
+   caisat-backend-xxxxxxxxx-xxxxx                1/1     Running   0          5m
+   caisat-detection-backend-xxxxxxxxx-xxxxx      1/1     Running   0          5m
+   caisat-backend-changedetection-xxx-xxxxx      1/1     Running   0          5m
+   caisat-frontend-xxxxxxxxx-xxxxx               1/1     Running   0          5m
+   swinir-predictor-xxxxxxxxx-xxxxx              2/2     Running   0          5m
+   yolov8m-satelite-predictor-xxxxxxxxx-xxxxx    2/2     Running   0          5m
+   sentinel2-predictor-xxxxxxxxx-xxxxx           2/2     Running   0          5m
+   caisat-s4-xxxxxxxxx-xxxxx                     1/1     Running   0          5m
    ```
 
-2. **Verify both model servers are ready**:
+2. **Verify all model servers are ready**:
    ```bash
    oc get inferenceservice -n caisat
    ```
    
-   Both InferenceServices should show `READY: True`.
+   All three InferenceServices should show `READY: True`.
 
 3. **Access the application**:
    - Open the route URL from step 5 of Installation in your web browser
@@ -204,7 +215,8 @@ oc delete project caisat
    - Bounding boxes are drawn with confidence scores
 7. **Compare**: View original, enhanced, and detected images (collapsible panels)
 8. **Review**: See detected objects with class names and confidence scores
-9. **Download**: Save the enhanced or detected image for your records
+9. **Monitor**: Click "Monitored Areas" to view pre-analyzed locations with change detection timelines
+10. **Download**: Save the enhanced or detected image for your records
 
 Processing time: ~10-15 seconds per enhancement, ~5-6 seconds per detection on CPU.
 
@@ -214,6 +226,9 @@ Processing time: ~7-15 seconds per image on CPU.
 ---
 
 ## Use Cases
+
+### Change Detection & Monitoring
+Track development and land use changes across multiple locations over time with automated Sentinel2 analysis. View pre-analyzed locations (Las Vegas, Dubai, Death Valley, Phoenix) with 14-day timeline charts showing change intensity and trends.
 
 ### Agriculture & Crop Monitoring
 Enhance satellite imagery of agricultural fields to detect crop stress, improve field boundary detection, and analyze historical low-resolution archives. Detect vehicles, storage tanks, and infrastructure to monitor farm operations and equipment distribution.
@@ -238,6 +253,7 @@ Demonstrate AI image processing techniques in Earth observation courses. Show st
 - [YOLOv8 Documentation](https://docs.ultralytics.com/) - Ultralytics
 - [DOTA Dataset](https://captain-whu.github.io/DOTA/) - Object Detection in Aerial Images
 - [Esri World Imagery](https://www.esri.com/en-us/arcgis/products/arcgis-living-atlas/overview)
+- [NASA GIBS](https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs) - Global Imagery Browse Services
 
 ---
 
@@ -251,9 +267,10 @@ Apache 2.0 License - See [LICENSE](LICENSE) file
 
 - **Built by**: Red Hat CAI Team
 - **Powered by**: Red Hat OpenShift AI
-- **Models**: SwinIR by Jingyun Liang et al., YOLOv8-OBB by Ultralytics
-- **Satellite Imagery**: Esri World Imagery Service
+- **Models**: SwinIR by Jingyun Liang et al., YOLOv8-OBB by Ultralytics, Sentinel2 by SatlasPretrain
+- **Satellite Imagery**: Esri World Imagery Service, NASA GIBS (Global Imagery Browse Services)
 - **Base Images**: Red Hat Universal Base Image 9 (UBI9)
+- **Maintained by**: Sara Banderby
 
 ---
 
