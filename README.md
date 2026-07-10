@@ -266,8 +266,7 @@ Apache 2.0 License - See [LICENSE](LICENSE) file
 ## Tags
 
 * **Industry:** Goverment
-* **Use case:** Earth Observation
-* **Business challenge:** Satellite imagery
+* **Use case:** Satellite Earth Observation
 
 ---
 
