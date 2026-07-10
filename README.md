@@ -263,6 +263,14 @@ Apache 2.0 License - See [LICENSE](LICENSE) file
 
 ---
 
+## Tags
+
+* **Industry:** Goverment
+* **Use case:** Earth Observation
+* **Business challenge:** Satellite imagery
+
+---
+
 ## Credits
 
 - **Built by**: Red Hat CAI Team
