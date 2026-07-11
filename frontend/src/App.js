@@ -594,14 +594,22 @@ function App() {
                             className="crop-base-image"
                             draggable="false"
                             style={{ display: 'block' }}
+                            ref={(img) => {
+                              if (img) {
+                                // Calculate scale factor from natural to display dimensions
+                                const scale = img.getBoundingClientRect().width / img.naturalWidth;
+                                // Store it for the crop box positioning
+                                img.dataset.displayScale = scale;
+                              }
+                            }}
                           />
                           <div
                             className="crop-box"
                             style={{
-                              left: `${cropArea.x}px`,
-                              top: `${cropArea.y}px`,
-                              width: `${cropArea.size}px`,
-                              height: `${cropArea.size}px`
+                              left: `${cropArea.x * (document.querySelector('.crop-base-image')?.dataset.displayScale || 1)}px`,
+                              top: `${cropArea.y * (document.querySelector('.crop-base-image')?.dataset.displayScale || 1)}px`,
+                              width: `${cropArea.size * (document.querySelector('.crop-base-image')?.dataset.displayScale || 1)}px`,
+                              height: `${cropArea.size * (document.querySelector('.crop-base-image')?.dataset.displayScale || 1)}px`
                             }}
                           >
                             <div className="crop-label">256×256</div>
