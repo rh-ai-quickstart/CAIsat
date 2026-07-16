@@ -1,12 +1,12 @@
 <!--
-Title: AI-Powered Satellite Imagery Enhancement
+Title: Enhance Satellite Imagery & Detect Objects
 Description: Deploy AI-powered resolution enhancement for satellite imagery using OpenShift AI on Red Hat OpenShift.
 Industry: Earth Observation, Agriculture, Urban Planning
 Product: Red Hat OpenShift AI
 Use case: Satellite Image Processing
 -->
 
-# AI-Powered Satellite Imagery Enhancement & Object Detection
+# Enhance Satellite Imagery & Detect Objects
 
 Deploy AI-powered resolution enhancement, object detection, and change detection for satellite imagery using OpenShift AI on Red Hat OpenShift.
 
@@ -35,6 +35,11 @@ Deploy AI-powered resolution enhancement, object detection, and change detection
 Welcome to CAIsat, where you can gaze upon Earth from space, enhance satellite imagery, detect objects, and track changes over time with the power of AI. This application lets users navigate live satellite maps, capture regions to enhance from 256×256 to 512×512 resolution using the SwinIR deep learning model, detect objects like planes, ships, vehicles, and infrastructure using YOLOv8-OBB, and monitor pre-analyzed locations with automated change detection using Sentinel2 — all running on Red Hat OpenShift AI.
 
 ---
+
+### See it in action
+
+**[▶️ View Interactive Demo](https://interact.redhat.com/share/fI0fe7hYfqZgkrxRxCXZ)**
+
 
 ## Architecture
 
