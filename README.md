@@ -206,7 +206,7 @@ oc delete project caisat
 **S4 storage authentication**: The S4 web UI is protected by a randomly generated password. To retrieve it after deployment:
 
    ```bash
-   oc get secret caisat-s4-credentials -n caisat -o jsonpath='{.data.UI_PASSWORD}' | base64 -d
+   oc get secret caisat-s4-credentials -n caisat -o jsonpath='{.data.UI_PASSWORD}' | base64 -d ; echo
    ```
    The default username is `admin`. To use a custom username, set `s4.auth.username` during install.
 
