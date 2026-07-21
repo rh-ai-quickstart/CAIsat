@@ -250,6 +250,9 @@ s4:
     maxFileSizeGb: "20"
     port: "5000"
 
+  auth:
+    username: admin
+
   credentials:
     accessKey: caisat-access-key
     secretKey: caisat-secret-key-change-in-production

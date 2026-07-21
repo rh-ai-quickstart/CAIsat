@@ -119,8 +119,8 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 
 ### Prerequisites
 
-1. **Red Hat OpenShift 4.2x cluster** 
-2. **OpenShift AI 3.x** 
+1. **Red Hat OpenShift 4.2x cluster**
+2. **OpenShift AI 3.x**
 3. **oc CLI** authenticated to your cluster
 4. **Helm 3.10+** installed locally
 
@@ -164,7 +164,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    ```bash
    oc get pods -n caisat
    ```
-   
+
    Expected output showing application pods:
    ```
    NAME                                          READY   STATUS    RESTARTS   AGE
@@ -182,7 +182,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    ```bash
    oc get inferenceservice -n caisat
    ```
-   
+
    All three InferenceServices should show `READY: True`.
 
 3. **Access the application**:
@@ -200,6 +200,16 @@ oc delete project caisat
 ```
 
 ---
+
+### S4 UI credentials
+
+**S4 storage authentication**: The S4 web UI is protected by a randomly generated password. To retrieve it after deployment:
+
+   ```bash
+   oc get secret caisat-s4-credentials -n caisat -o jsonpath='{.data.UI_PASSWORD}' | base64 -d
+   ```
+   The default username is `admin`. To use a custom username, set `s4.auth.username` during install.
+
 
 ## How It Works
 
