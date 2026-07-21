@@ -155,7 +155,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 
 5. **Get the application URL**:
    ```bash
-   oc get route caisat-frontend -n caisat -o jsonpath='{.spec.host}'
+   echo "https://$(oc get route caisat -n caisat -o jsonpath='{.spec.host}')/"
    ```
 
 ### Validation

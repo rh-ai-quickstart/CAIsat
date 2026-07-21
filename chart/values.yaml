@@ -238,7 +238,7 @@ s4:
 
   storage:
     size: 10Gi
-    storageClassName: gp3-csi
+    storageClassName: ""
 
   config:
     awsRegion: us-east-1
