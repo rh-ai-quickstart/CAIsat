@@ -119,8 +119,8 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 
 ### Prerequisites
 
-1. **Red Hat OpenShift 4.2x cluster** 
-2. **OpenShift AI 3.x** 
+1. **Red Hat OpenShift 4.2x cluster**
+2. **OpenShift AI 3.x**
 3. **oc CLI** authenticated to your cluster
 4. **Helm 3.10+** installed locally
 
@@ -155,7 +155,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
 
 5. **Get the application URL**:
    ```bash
-   oc get route caisat-frontend -n caisat -o jsonpath='{.spec.host}'
+   echo "https://$(oc get route caisat -n caisat -o jsonpath='{.spec.host}')/"
    ```
 
 ### Validation
@@ -164,7 +164,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    ```bash
    oc get pods -n caisat
    ```
-   
+
    Expected output showing application pods:
    ```
    NAME                                          READY   STATUS    RESTARTS   AGE
@@ -182,7 +182,7 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    ```bash
    oc get inferenceservice -n caisat
    ```
-   
+
    All three InferenceServices should show `READY: True`.
 
 3. **Access the application**:
