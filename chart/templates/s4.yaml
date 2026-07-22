@@ -39,10 +39,18 @@ data:
 
 ---
 # Secret
+{{- $secretName := printf "%s-s4-credentials" (include "caisat.fullname" .) }}
+{{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+{{- $uiPassword := randAlphaNum 32 }}
+{{- if $existingSecret }}
+  {{- if index $existingSecret.data "UI_PASSWORD" }}
+    {{- $uiPassword = index $existingSecret.data "UI_PASSWORD" | b64dec }}
+  {{- end }}
+{{- end }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "caisat.fullname" . }}-s4-credentials
+  name: {{ $secretName }}
   labels:
     {{- include "caisat.labels" . | nindent 4 }}
     app.kubernetes.io/component: s4
@@ -50,6 +58,8 @@ type: Opaque
 stringData:
   AWS_ACCESS_KEY_ID: {{ .Values.s4.credentials.accessKey }}
   AWS_SECRET_ACCESS_KEY: {{ .Values.s4.credentials.secretKey }}
+  UI_USERNAME: {{ .Values.s4.auth.username | default "admin" }}
+  UI_PASSWORD: {{ $uiPassword }}
 
 ---
 # Deployment
@@ -91,13 +101,23 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
-              name: {{ include "caisat.fullname" . }}-s4-credentials
+              name: {{ $secretName }}
               key: AWS_ACCESS_KEY_ID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ include "caisat.fullname" . }}-s4-credentials
+              name: {{ $secretName }}
               key: AWS_SECRET_ACCESS_KEY
+        - name: UI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: UI_USERNAME
+        - name: UI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: UI_PASSWORD
         envFrom:
         - configMapRef:
             name: {{ include "caisat.fullname" . }}-s4-config
