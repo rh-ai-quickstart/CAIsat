@@ -238,7 +238,7 @@ s4:
 
   storage:
     size: 10Gi
-    storageClassName: ""
+    storageClassName: gp3-csi
 
   config:
     awsRegion: us-east-1
@@ -249,9 +249,6 @@ s4:
     maxConcurrentTransfers: "2"
     maxFileSizeGb: "20"
     port: "5000"
-
-  auth:
-    username: admin
 
   credentials:
     accessKey: caisat-access-key
