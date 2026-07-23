@@ -12,8 +12,8 @@ WORKDIR /app
 # Copy requirements file
 COPY requirements.txt .
 
-# Upgrade setuptools to fix CVEs from base image
-RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1"
+# Upgrade setuptools and pip to fix CVEs from base image
+RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1" "pip>=26.1.2"
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
