@@ -7,8 +7,13 @@ USER 1001
 
 WORKDIR /app
 
-# Install dependencies
+# Copy requirements file
 COPY requirements.txt .
+
+# Upgrade setuptools and pip to fix CVEs from base image
+RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1" "pip>=26.1.2"
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
