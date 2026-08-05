@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi9/python-311
 
-# Update packages for CVE fixes - 2026-08-05
+# CVE rebuild 2026-08-05
 USER 0
 RUN dnf update -y && dnf clean all
 USER 1001
