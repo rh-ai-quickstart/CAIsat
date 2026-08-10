@@ -6,9 +6,6 @@ metadata:
   labels:
     {{- include "caisat.labels" . | nindent 4 }}
     app.kubernetes.io/component: pipeline
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "9"
 data:
   analyze_seed_images_pipeline.yaml: |
 {{ .Files.Get "files/analyze_seed_images_pipeline.yaml" | nindent 4 }}
@@ -30,8 +27,19 @@ data:
             ssl_ca_cert=ssl_ca_cert
         )
 
-    pipeline = client.upload_pipeline("/pipeline/analyze_seed_images_pipeline.yaml", pipeline_name )
-    print(pipeline.pipeline_id)
+    try:
+        pipeline = client.upload_pipeline("/pipeline/analyze_seed_images_pipeline.yaml", pipeline_name)
+        print(f"Uploaded new pipeline: {pipeline.pipeline_id}")
+    except Exception as e:
+        print(f"Upload failed ({e}), checking for existing pipeline...")
+        pipelines = client.list_pipelines(filter=json.dumps({
+            "predicates": [{"operation": "EQUALS", "key": "display_name", "stringValue": pipeline_name}]
+        })).pipelines
+        if pipelines:
+            pipeline = pipelines[0]
+            print(f"Found existing pipeline: {pipeline.pipeline_id}")
+        else:
+            raise Exception(f"Could not upload or find pipeline '{pipeline_name}'")
 
     import time
     time.sleep(4)

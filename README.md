@@ -142,6 +142,14 @@ Activate satellite view to browse satellite imagery, capture a screenshot, selec
    helm install caisat ./chart --namespace caisat
    ```
 
+   If your RHOAI DataScienceCluster uses **headed** KServe serving (ClusterIP services on port 80), add the following flags:
+   ```bash
+   helm install caisat ./chart --namespace caisat \
+     --set model.port=80 \
+     --set sentinel2Model.port=80 \
+     --set detection.port=80
+   ```
+
    **What happens automatically:**
    - S4 storage deploys and seeds with 56 satellite images from NASA GIBS (4 locations × 14 days)
    - All three AI models deploy: SwinIR, YOLO, Sentinel2

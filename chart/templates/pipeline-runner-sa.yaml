@@ -6,9 +6,6 @@ metadata:
   labels:
     {{- include "caisat.labels" . | nindent 4 }}
     app.kubernetes.io/component: pipeline
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "8"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -18,13 +15,40 @@ metadata:
   labels:
     {{- include "caisat.labels" . | nindent 4 }}
     app.kubernetes.io/component: pipeline
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "8"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: edit
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "caisat.fullname" . }}-pipeline-runner
+    namespace: {{ .Release.Namespace }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "caisat.fullname" . }}-dspa-access
+  labels:
+    {{- include "caisat.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pipeline
+rules:
+  - apiGroups: ["datasciencepipelinesapplications.opendatahub.io"]
+    resources: ["datasciencepipelinesapplications"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "caisat.fullname" . }}-dspa-access
+  labels:
+    {{- include "caisat.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pipeline
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "caisat.fullname" . }}-dspa-access
 subjects:
   - kind: ServiceAccount
     name: {{ include "caisat.fullname" . }}-pipeline-runner
