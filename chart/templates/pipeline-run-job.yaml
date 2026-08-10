@@ -70,7 +70,7 @@ spec:
         - name: S3_SECRET_KEY
           value: "{{ .Values.s4.credentials.secretKey }}"
         - name: MODEL_ENDPOINT
-          value: "http://sentinel2-model-predictor.{{ .Release.Namespace }}.svc.cluster.local:8080"
+          value: "http://{{ .Values.sentinel2Model.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.sentinel2Model.port }}"
         - name: BUCKET_NAME
           value: "{{ .Values.s4.seed.bucketName }}"
         - name: RUN_NAME
