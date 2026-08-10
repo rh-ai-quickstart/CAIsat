@@ -1,0 +1,104 @@
+name: caisat
+
+displayName: CAIsat
+
+description: >-
+  AI-powered satellite imagery analysis platform that deploys resolution
+  enhancement (SwinIR) and object detection (YOLOv8-OBB) for satellite
+  imagery using OpenShift AI.
+
+version: "1.0.0"
+
+icon: https://raw.githubusercontent.com/rh-ai-quickstart/CAIsat/main/docs/images/icon.svg
+image: https://raw.githubusercontent.com/rh-ai-quickstart/CAIsat/refs/heads/main/docs/images/CAIsat.png
+
+maintainer:
+  name: Sara Banderby
+  github: rh-ai-quickstart
+
+repository: https://github.com/rh-ai-quickstart/CAIsat
+
+deployment:
+  scope: project
+  chart:
+    type: repo
+    path: chart/
+    branch: main
+  defaultValues: {}
+  configurableValues:
+    # -- ML tuning (most interesting to users) --
+    - key: detectionBackend.env.confidenceThreshold
+      label: Detection confidence threshold
+      description: Minimum confidence (0–1) for YOLO object detection results.
+      type: string
+      default: "0.5"
+    - key: detectionBackend.env.iouThreshold
+      label: IoU threshold
+      description: Intersection-over-Union threshold (0–1) for non-max suppression.
+      type: string
+      default: "0.45"
+
+    # -- Feature toggles --
+    - key: s4.enabled
+      label: Enable S4 storage
+      description: Deploy the built-in S3-compatible storage for satellite images.
+      type: boolean
+      default: true
+    - key: s4.seed.enabled
+      label: Seed demo data
+      description: Download sample satellite images after install.
+      type: boolean
+      default: true
+    - key: pipelines.enabled
+      label: Enable data science pipelines
+      description: Deploy OpenShift AI Data Science Pipelines infrastructure.
+      type: boolean
+      default: true
+    - key: pipelines.runAnalysis
+      label: Auto-run analysis pipeline
+      description: Automatically run the satellite image analysis pipeline after install.
+      type: boolean
+      default: true
+    - key: backendChangedetection.enabled
+      label: Enable change detection
+      description: Deploy the satellite image change detection backend.
+      type: boolean
+      default: true
+
+    # -- Storage sizing --
+    - key: s4.storage.size
+      label: Storage size
+      description: Persistent volume size for satellite image storage.
+      type: string
+      default: "10Gi"
+      options: ["5Gi", "10Gi", "20Gi", "50Gi"]
+
+rbac:
+  requiredPermissions:
+    - apiGroup: ""
+      resource: pods
+      verbs: [get, list]
+    - apiGroup: apps
+      resource: deployments
+      verbs: [get, list, create, delete]
+    - apiGroup: ""
+      resource: services
+      verbs: [get, list, create, delete]
+    - apiGroup: ""
+      resource: configmaps
+      verbs: [get, list, create, delete]
+    - apiGroup: serving.kserve.io
+      resource: inferenceservices
+      verbs: [get, list, create, delete]
+
+prerequisites:
+  - Red Hat OpenShift 4.2x cluster with OpenShift AI 3.x
+  - Minimum 7.5 CPU cores and 13.5 GiB memory available in the target namespace
+  - GPU optional — CPU inference supported (~7-15 seconds per image)
+
+tags:
+  - satellite
+  - earth-observation
+  - image-enhancement
+  - object-detection
+  - computer-vision
