@@ -262,7 +262,7 @@ deploymentSpec:
           \ Change: {max_change:.2f}%\")\n    print(f\"  Min Change: {min_change:.2f}%\"\
           )\n    print(f\"  Images Processed: {len(results)}\")\n    print(f\"{'='*80}\\\
           n\")\n\n    return stats\n\n"
-        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+        image: registry.redhat.io/ubi9/python-311:latest
     exec-analyze-location-2:
       container:
         args:
@@ -415,7 +415,7 @@ deploymentSpec:
           \ Change: {max_change:.2f}%\")\n    print(f\"  Min Change: {min_change:.2f}%\"\
           )\n    print(f\"  Images Processed: {len(results)}\")\n    print(f\"{'='*80}\\\
           n\")\n\n    return stats\n\n"
-        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+        image: registry.redhat.io/ubi9/python-311:latest
     exec-analyze-location-3:
       container:
         args:
@@ -568,7 +568,7 @@ deploymentSpec:
           \ Change: {max_change:.2f}%\")\n    print(f\"  Min Change: {min_change:.2f}%\"\
           )\n    print(f\"  Images Processed: {len(results)}\")\n    print(f\"{'='*80}\\\
           n\")\n\n    return stats\n\n"
-        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+        image: registry.redhat.io/ubi9/python-311:latest
     exec-analyze-location-4:
       container:
         args:
@@ -721,7 +721,7 @@ deploymentSpec:
           \ Change: {max_change:.2f}%\")\n    print(f\"  Min Change: {min_change:.2f}%\"\
           )\n    print(f\"  Images Processed: {len(results)}\")\n    print(f\"{'='*80}\\\
           n\")\n\n    return stats\n\n"
-        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+        image: registry.redhat.io/ubi9/python-311:latest
     exec-update-areas-summary:
       container:
         args:
@@ -785,7 +785,7 @@ deploymentSpec:
           \\n Updated s3://{bucket_name}/{areas_key}\")\n    print(f\"  Total areas:\
           \ {len(areas)}\")\n    print(f\"  Total images: {total_images}\")\n    print(\"\
           =\" * 80)\n\n"
-        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+        image: registry.redhat.io/ubi9/python-311:latest
 pipelineInfo:
   description: Analyze all seed satellite images using SatlasPretrain and generate
     statistics for CAIsat frontend
