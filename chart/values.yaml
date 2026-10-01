@@ -268,7 +268,7 @@ s4:
   seed:
     enabled: true
     bucketName: satellite-images
-    image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+    image: registry.redhat.io/ubi9/python-311:latest
     waitImage: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
     resources:
       requests:
@@ -325,5 +325,5 @@ pipelines:
   runAnalysis: true
 
   analysis:
-    image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.1
+    image: registry.redhat.io/ubi9/python-311:latest
     waitImage: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
